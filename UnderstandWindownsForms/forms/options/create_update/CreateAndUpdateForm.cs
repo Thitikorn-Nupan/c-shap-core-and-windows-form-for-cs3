@@ -9,24 +9,27 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using UnderstandWindownsForms.entities;
+using UnderstandWindownsForms.forms.options.reads_read;
+using UnderstandWindownsForms.logging;
 using UnderstandWindownsForms.repository;
 using UnderstandWindownsForms.sevices;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
-namespace UnderstandWindownsForms.forms.options.create_update
-{
-    public partial class CreateAndUpdateForm : Form
-    {
+namespace UnderstandWindownsForms.forms.options.create_update {
+
+    public partial class CreateAndUpdateForm : Form {
+        private TtknpLog ttknpLog;
+        private ILogger logger;
         private ObjectRepo<Mobile> mobileService;
-        public CreateAndUpdateForm()
-        {
+
+        public CreateAndUpdateForm() {
             InitializeComponent();
+            logger = new TtknpLog().iLoggerFactory.CreateLogger<CreateAndUpdateForm>();
             addComponentsToPanels();
             mobileService = new MobileService();
         }
 
-        private void addComponentsToPanels()
-        {
+        private void addComponentsToPanels() {
             // remember panels don't nested becasue it mapped auto
             // add components to Panel create
             panelCreateForm.Controls.Add(label1);
@@ -61,45 +64,31 @@ namespace UnderstandWindownsForms.forms.options.create_update
             panelUpdateForm.Hide();
         }
 
-        private void onClickedAddCheckboxMobile(object sender, EventArgs e)
-        {
-            if (checkBoxCreate.Checked)
-            {
+        private void onClickedAddCheckboxMobile(object sender, EventArgs e) {
+            if (checkBoxCreate.Checked) {
                 panelCreateForm.Show();
                 // *** common
                 checkBoxUpdate.Enabled = false;
             }
-            else
-            {
+            else {
                 panelCreateForm.Hide();
                 checkBoxUpdate.Enabled = true;
             }
         }
 
-        private void onClickedEditCheckboxMobile(object sender, EventArgs e)
-        {
-            if (checkBoxUpdate.Checked)
-            {
+        private void onClickedEditCheckboxMobile(object sender, EventArgs e) {
+            if (checkBoxUpdate.Checked) {
                 panelUpdateForm.Show();
                 // *** common
                 checkBoxCreate.Enabled = false;
             }
-            else
-            {
+            else {
                 panelUpdateForm.Hide();
                 checkBoxCreate.Enabled = true;
             }
-
         }
 
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            // logger.LogInformation("{}", e.CloseReason); // when user close will log UserClosing
-            Application.Exit(); // use instead Close() is good , Why use Close() then it has many loops  
-        }
-
-        private void onClickedCreate(object sender, EventArgs e)
-        {
+        private void onClickedCreate(object sender, EventArgs e) {
             Mobile mobile = new Mobile(
                 textBoxMobileId.Text,
                 textBoxModel.Text,
@@ -107,12 +96,12 @@ namespace UnderstandWindownsForms.forms.options.create_update
                 Convert.ToDouble(textBoxPrice.Text),
                 Convert.ToInt32(textBoxAmount.Text)
                 );
-            bool resultQuery = mobileService.addObject(mobile);
-            // if created 
-            if (resultQuery)
-            {
+
+            bool resultQuery = mobileService.createObject(mobile);
+            // if created
+            if (resultQuery) {
                 // may alert success
-                string messageBoxText = $"Add Mobile ID : {mobile.Mbid} to database";
+                string messageBoxText = $"Added Mobile ID : {mobile.Mbid} to database";
                 string caption = "Successed";
                 MessageBox.Show(messageBoxText, caption, MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
                 // clear text boxes
@@ -122,19 +111,12 @@ namespace UnderstandWindownsForms.forms.options.create_update
                 textBoxPrice.Text = "";
                 textBoxAmount.Text = "";
             }
-            else
-            {
-                MessageBox.Show("something was wrong", "Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                // when failed
-            }
         }
 
-        private void onClickedSearch(object sender, EventArgs e)
-        {
+        private void onClickedSearch(object sender, EventArgs e) {
             string mbid = textBoxMobileIdForSearch.Text;
             Mobile mobile = mobileService.getObject(mbid);
-            if (mobile != null)
-            {
+            if (mobile != null) {
                 // clear list
                 listViewMobiles.Items.Clear();
                 string[] items = { $"{mobile.Mbid}", $"{mobile.Model}", $"{mobile.Brand}", $"{mobile.Price}", $"{mobile.Amount}" };
@@ -143,35 +125,68 @@ namespace UnderstandWindownsForms.forms.options.create_update
                 // and add to textbox
                 textBoxModelEdit.Text = mobile.Model;
                 textBoxBrandEdit.Text = mobile.Brand;
-                textBoxPriceEdit.Text =  $@"{mobile.Price}";
+                textBoxPriceEdit.Text = $@"{mobile.Price}";
                 textBoxAmountEdit.Text = $@"{mobile.Amount}";
                 // enable edit
                 textBoxModelEdit.Enabled = true;
                 textBoxBrandEdit.Enabled = true;
                 textBoxPriceEdit.Enabled = true;
                 textBoxAmountEdit.Enabled = true;
+                // enable button
+                buttonEdit.Enabled = true;
             }
-            else
-            {
-
-                listViewMobiles.Items.Clear();
-
-                textBoxModelEdit.Text = "";
-                textBoxBrandEdit.Text = "";
-                textBoxPriceEdit.Text = "";
-                textBoxAmountEdit.Text = "";
-
-                textBoxModelEdit.Enabled = false;
-                textBoxBrandEdit.Enabled = false;
-                textBoxPriceEdit.Enabled = false;
-                textBoxAmountEdit.Enabled = false;
+            else {
+                clearTextBoxesAndButtonAndUnenabled();
             }
-            
         }
 
-        private void onClickedEditForm(object sender, EventArgs e)
-        {
 
+        private void onClickedEditForm(object sender, EventArgs e) {
+            string mbid = listViewMobiles.Items[0].Text;
+            logger.LogInformation("mbid : {}", mbid);
+
+            Mobile mobile = new Mobile(
+                "",
+                textBoxModelEdit.Text,
+                textBoxBrandEdit.Text,
+                Convert.ToDouble(textBoxPriceEdit.Text),
+                Convert.ToInt32(textBoxAmountEdit.Text)
+            );
+
+            bool resultQuery = mobileService.editObject(mobile, mbid);
+            if (resultQuery) {
+                // may alert success
+                string messageBoxText = $"Updated Mobile ID : {mobile.Mbid} to database";
+                string caption = "Successed";
+                MessageBox.Show(messageBoxText, caption, MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                // clear text boxes
+                clearTextBoxesAndButtonAndUnenabled();
+            }
+        }
+
+        private void clearTextBoxesAndButtonAndUnenabled() {
+            
+            listViewMobiles.Items.Clear();
+            textBoxMobileIdForSearch.Text = "";
+
+            textBoxModelEdit.Text = "";
+            textBoxBrandEdit.Text = "";
+            textBoxPriceEdit.Text = "";
+            textBoxAmountEdit.Text = "";
+
+            textBoxModelEdit.Enabled = false;
+            textBoxBrandEdit.Enabled = false;
+            textBoxPriceEdit.Enabled = false;
+            textBoxAmountEdit.Enabled = false;
+
+            buttonEdit.Enabled = false;
+        }
+
+        protected override void OnClosing(CancelEventArgs e) {
+            logger.LogInformation("CreateAndUpdate class gonna close");
+            if (Application.OpenForms.Count == 0) {
+                Application.Exit();
+            }
         }
     }
 }

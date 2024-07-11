@@ -5,14 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UnderstandWindownsForms.logging
-{
-    internal class TtknpLog
-    {
+namespace UnderstandWindownsForms.logging {
+
+    internal class TtknpLog {
+
         public ILoggerFactory iLoggerFactory;
 
-        public TtknpLog()
-        {
+        public TtknpLog() {
             iLoggerFactory = LoggerFactory.Create(
                 builder => builder
                     // add console as logging target
@@ -21,7 +20,6 @@ namespace UnderstandWindownsForms.logging
                     // set minimum level to log
                     .SetMinimumLevel(LogLevel.Debug)
             );
-
         }
     }
 }

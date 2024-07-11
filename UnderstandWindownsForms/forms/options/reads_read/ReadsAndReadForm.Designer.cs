@@ -164,7 +164,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
             this.BackColor = System.Drawing.SystemColors.ControlDark;
-            this.ClientSize = new System.Drawing.Size(600, 465);
+            this.ClientSize = new System.Drawing.Size(618, 493);
             this.Controls.Add(this.labelMessage);
             this.Controls.Add(this.button);
             this.Controls.Add(this.listViewMobiles);

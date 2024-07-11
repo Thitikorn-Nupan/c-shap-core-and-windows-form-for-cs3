@@ -11,20 +11,13 @@ using System.Windows.Forms;
 using UnderstandWindownsForms.entities;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
-namespace UnderstandWindownsForms.forms.options.student_list
-{
-    public partial class StudentListForm : Form
-    {
+namespace UnderstandWindownsForms.forms.options.student_list {
+
+    public partial class StudentListForm : Form {
         private List<Student> students;
 
-        public StudentListForm()
-        {
+        public StudentListForm() {
             InitializeComponent();
-
-        }
-
-        private void addStudentsToList()
-        {
             students = new List<Student>();
             students.Add(new Student(1000, "alex ryder", 22, 66.6F, 169.6F));
             students.Add(new Student(1001, "kevin owner", 22, 66.6F, 169.6F));
@@ -32,10 +25,12 @@ namespace UnderstandWindownsForms.forms.options.student_list
             students.Add(new Student(1003, "randy ortuns", 21, 66.6F, 169.6F));
             students.Add(new Student(1004, "lux ortuns", 22, 6.6F, 169.6F));
             students.Add(new Student(1005, "max slider", 22, 6.6F, 169.6F));
+        }
+
+        private void addStudentsToList() {
 
             // way to add items to listView component
-            for (int i = 0; i < students.Count; i++)
-            {
+            for (int i = 0; i < students.Count; i++) {
                 Student student = students[i];
                 Console.WriteLine(student);
                 string[] items = { $"{student.Id}", $"{student.Fullname}", $"{student.Age}" };
@@ -44,36 +39,33 @@ namespace UnderstandWindownsForms.forms.options.student_list
             }
         }
 
-        private void loadStudentList(object sender, EventArgs e)
-        {
+        private void loadStudentList(object sender, EventArgs e) {
             // Console.WriteLine(checkBoxLoadStudentList.Checked);
-            if (checkBoxLoadStudentList.Checked)
-            {
+            if (checkBoxLoadStudentList.Checked) {
                 addStudentsToList();
             }
-            else
-            {
+            else {
                 listViewStudentList.Items.Clear();
             }
         }
 
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            Close();
+        protected override void OnClosing(CancelEventArgs e) {
+            if (Application.OpenForms.Count == 0) {
+                Application.Exit();
+            }
         }
 
         private void onMouseClicked(object sender, MouseEventArgs e) {
-                int? row = null;
-                if (listViewStudentList.SelectedItems.Count > 0) // idf user clicked some rows
-                {
-                    row = listViewStudentList.Items.IndexOf(listViewStudentList.SelectedItems[0]);
-                }
+            int? row = null;
+            if (listViewStudentList.SelectedItems.Count > 0) // idf user clicked some rows
+            {
+                row = listViewStudentList.Items.IndexOf(listViewStudentList.SelectedItems[0]);
+            }
 
-                /*students.ForEach((student =>
-                {
-
-                }));*/
-                Console.WriteLine(students[row ?? 0]);
+            /*students.ForEach((student =>
+            {
+            }));*/
+            Console.WriteLine(students[row ?? 0]);
         }
     }
 }
